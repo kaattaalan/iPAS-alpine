@@ -34,32 +34,39 @@
       <h2>Login</h2>
 
       <label for="email">Email</label>
-      <input x-model="email" type="email" id="email" placeholder="Email address">
+      <input x-model="email" type="email" id="loginEmail" placeholder="Email address">
 
       <label for="password">Password</label>
-      <input x-model="password" type="password" id="password">
+      <input x-model="password" type="loginPassword" id="password">
 
       <button @click="login()" class="contrast outline">Login</button>
 
       <mark x-show="loginMessage" x-text="loginMessage"></mark>
 
-      <hr style="margin: 4rem;">
-      </hr>
 
-      <h2>Signup</h2>
+      <div x-data="{ showSignup: false }">
+        <button @click="showSignup = true">Sign Up</button>
 
-      <label for="email">Email</label>
-      <input x-model="email" type="email" id="email" placeholder="Email address">
+        <template x-if="showSignup">
+          <div>
+            <h2>Signup</h2>
 
-      <label for="password">Password</label>
-      <input x-model="password" type="password" id="password">
+            <label for="email">Email</label>
+            <input x-model="email" type="email" id="email" placeholder="Email address">
 
-      <label for="passwordConfirm">Confirm Password</label>
-      <input x-model="passwordConfirm" type="password" id="passwordConfirm">
+            <label for="password">Password</label>
+            <input x-model="password" type="password" id="password">
 
-      <button @click="signup()" class="contrast outline">Signup</button>
+            <label for="passwordConfirm">Confirm Password</label>
+            <input x-model="passwordConfirm" type="password" id="passwordConfirm">
 
-      <mark x-show="signupMessage" x-text="signupMessage"></mark>
+            <button @click="signup()" class="contrast outline">Signup</button>
+
+            <mark x-show="signupMessage" x-text="signupMessage"></mark>
+          </div>
+        </template>
+      </div>
+
 
     </article>
 
@@ -132,6 +139,7 @@
 
         // login / signup
         showLogin: false,
+        showSignup: false,
         email: null,
         password: null,
         passwordConfirm: null,
@@ -172,7 +180,7 @@
           this.client.authStore.save(auth.token, auth.model)
 
           // fetch todo lists
-          this.getLists()
+          await this.getLists()
 
           // suscribe to live update events
           this.subscribeToLists()
@@ -229,10 +237,12 @@
         },
 
         async getLists() {
-          const { items } = await this.client.collection('list').getFullList({
-            sort: '-created',
+          this.client.collection('list').getList(1, 50).then((result) => {
+            const { items } = result;
+            this.lists = items;
+          }).catch((error) => {
+            console.log('Error:', error);
           });
-          this.lists = items
         },
 
         async createList() {
@@ -257,11 +267,14 @@
 
         async selectList(list) {
           try {
-            this.items = await this.client.collection('list').getOne('${ list.id }')
-            this.selectedList = list
+            this.client.collection('item').getList(null, null, { filter: `list.id = '${list.id}'` }).then((result) => {
+              this.items = result.items;
+              this.selectedList = list
+
+            });
 
             // suscribe to live update events
-            this.client.realtime.subscribe('item', e => {
+            this.client.collection('item').subscribe('*', e => {
               if (e.record.list !== list.id) return
               if (e.action === 'create') this.items.push(e.record)
               if (e.action === 'update')
@@ -277,7 +290,7 @@
         // items functions
         async createItem() {
           try {
-            await this.client.records.create('item', { text: this.newItem, list: this.selectedList.id })
+            await this.client.collection('item').create({ text: this.newItem, list: this.selectedList.id })
             this.newItem = ''
           } catch (err) {
             console.log('ERR', err)
@@ -286,7 +299,7 @@
 
         async deleteItem(item) {
           try {
-            await this.client.records.delete('item', item.id)
+            await this.client.collection('item').delete(item.id)
           } catch (err) {
             console.log('ERR', err)
           }
@@ -294,7 +307,7 @@
 
         async toggleDone(item, toggle) {
           try {
-            await this.client.records.update('item', item.id, { done: toggle })
+            await this.client.collection('item').update(item.id, { done: toggle })
           } catch (err) {
             console.log('ERR', err)
           }
