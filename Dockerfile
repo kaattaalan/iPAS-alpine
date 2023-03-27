@@ -10,6 +10,10 @@ RUN apk add --no-cache \
 ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
 RUN unzip /tmp/pb.zip -d /pb/
 
+# create directory and copy files
+RUN mkdir -p /pb/pb_public/
+COPY ./ /pb/pb_public/
+
 EXPOSE 8080
 
 # start PocketBase

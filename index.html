@@ -9,6 +9,7 @@
   <title>DooDoo - Pocket To-Do List</title>
 
   <script src="js/pocketbase.umd.js"></script>
+  <script src="js/install_pwa.js"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
@@ -25,6 +26,8 @@
         </li>
       </ul>
       <ul>
+        <li><i @click="installPWA()" id="install-prompt" class="bx bx-download bx-md" style="cursor: pointer"></i>
+        </li>
         <li><i x-show="!showLogin" @click="logout()" class="bx bx-log-out bx-md" style="cursor: pointer"></i></li>
       </ul>
     </nav>
@@ -37,7 +40,7 @@
       <input x-model="email" type="email" id="loginEmail" placeholder="Email address">
 
       <label for="password">Password</label>
-      <input x-model="password" type="loginPassword" id="password">
+      <input x-model="password" type="password" id="loginPassword">
 
       <button @click="login()" class="contrast outline">Login</button>
 
@@ -125,6 +128,8 @@
         navigator.serviceWorker.register('./service-worker.js').then(function (registration) {
           // Registration was successful
           console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          //Add install button if not yet installed
+          window.addEventListener('beforeinstallprompt', installHandler);
         }, function (err) {
           // registration failed
           console.log('ServiceWorker registration failed: ', err);
@@ -157,8 +162,11 @@
 
         async init() {
 
+          //construct baseurl
+          const baseUrl = `${window.location.protocol}//${window.location.host}/`;
+
           // initialize pocketbase
-          this.client = new PocketBase('http://127.0.0.1:8080/');
+          this.client = new PocketBase(`${baseUrl}`);
 
           // capture invalid token
           this.client.afterSend = function (response, data) {

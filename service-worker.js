@@ -14,9 +14,18 @@ self.addEventListener('install', event => {
     );
 });
 
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => response || fetch(event.request))
-    );
+self.addEventListener('fetch', (event) => {
+    // Check if the request is for an HTML file
+    if (event.request.headers.get('Accept').includes('text/html')) {
+        // Add a cache-busting URL parameter
+        const url = new URL(event.request.url);
+        url.searchParams.set('cache-bust', Date.now());
+        const cacheBustedRequest = new Request(url, event.request);
+        event.respondWith(fetch(cacheBustedRequest));
+    } else {
+        event.respondWith(
+            caches.match(event.request)
+                .then(response => response || fetch(event.request))
+        );
+    }
 });
