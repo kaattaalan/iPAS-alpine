@@ -14,6 +14,9 @@ RUN unzip /tmp/pb.zip -d /pb/
 RUN mkdir -p /pb/pb_public/
 COPY ./ /pb/pb_public/
 
+#Add docker volume for db
+VOLUME /pb/pb_data
+
 EXPOSE 8080
 
 # start PocketBase

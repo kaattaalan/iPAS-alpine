@@ -1,0 +1,1 @@
+docker run -p 8080:8080 -v D:/Temp/volumes/pb_data:/pb/pb_data -d pocket-base
