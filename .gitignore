@@ -2,3 +2,4 @@ pocketbase
 pb_data
 /cron-server/node_modules
 /cron-server/package-lock.json
+/cron-server/vapid.json
