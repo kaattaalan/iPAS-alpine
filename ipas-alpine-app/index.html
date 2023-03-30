@@ -29,6 +29,9 @@
         <li><i @click="installPWA()" id="install-prompt" class="bx bx-download bx-md"
             style="cursor: pointer; display: none;"></i>
         </li>
+        <li><i @click="promptNotifications(addNotificationSubscription,this.client)" id="notify-prompt"
+            class="bx bxs-bell bx-md" style="cursor: pointer; display: block;"></i>
+        </li>
         <li><i x-show="!showLogin" @click="logout()" class="bx bx-log-out bx-md" style="cursor: pointer"></i></li>
       </ul>
     </nav>
@@ -193,6 +196,14 @@
 
           // suscribe to live update events
           this.subscribeToLists()
+        },
+
+        async addNotificationSubscription(subscription, pbClient) {
+          userSubscription = await pbClient.collection('subscriptions').getList(null, null, { filter: `userId="${this.client.authStore.baseModel.id}"` });
+          if (userSubscription.items.length < 1) {
+            savedSubscription.userId = pbClient.authStore.baseModel.id;
+            pbClient.collection('subscriptions').create(savedSubscription);
+          }
         },
 
         // login

@@ -1,5 +1,5 @@
 // Set the cache name and version
-const CACHE_NAME = 'ipas-cache-v1';
+const CACHE_NAME = 'ipas-cache-v2';
 
 // Set the list of URLs to cache
 const urlsToCache = [
@@ -44,3 +44,14 @@ self.addEventListener('fetch', (event) => {
             .then(response => response || fetch(event.request))
     );
 });
+
+//Push notifications listener
+self.addEventListener('push', function (e) {
+    const data = e.data.json();
+    self.registration.showNotification(
+        data.title,
+        {
+            body: data.body,
+        }
+    );
+})

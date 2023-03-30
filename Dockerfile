@@ -12,7 +12,7 @@ RUN unzip /tmp/pb.zip -d /pb/
 
 # create directory and copy files
 RUN mkdir -p /pb/pb_public/
-COPY ./ /pb/pb_public/
+COPY ./ipas-alpine-app/ /pb/pb_public/
 
 #Add docker volume for db
 VOLUME /pb/pb_data
