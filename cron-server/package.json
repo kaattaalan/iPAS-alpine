@@ -4,7 +4,8 @@
   "description": "A supplimentary server for my iPAS pocketbase backend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "ncc build server.js -o dist"
   },
   "dependencies": {
     "eventsource": " ^ 2.0.2",

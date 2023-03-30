@@ -1,6 +1,11 @@
 FROM alpine:latest
 
 ARG PB_VERSION=0.13.4
+ARG PB_URL="0.0.0.0:8080"
+ARG CRON_EXPRESSION="* * * * *"
+
+ENV PB_URL=$PB_URL
+ENV CRON_EXPRESSION=$CRON_EXPRESSION
 
 RUN apk add --no-cache \
     unzip \

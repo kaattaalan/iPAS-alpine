@@ -22,7 +22,7 @@ webPush.setVapidDetails(
 const app = express();
 
 // Get the environment variables
-const cronExpression = process.env.CRON_EXPRESSION || '*/10 * * * * *';
+const cronExpression = process.env.CRON_EXPRESSION || '* * * * *';
 const pbBaseUrl = process.env.PB_URL || 'http://127.0.0.1:8080';
 
 const pb = new PocketBase(pbBaseUrl);
