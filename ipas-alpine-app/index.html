@@ -335,6 +335,7 @@
           })
         },
         async subscribe() {
+          //fetch data needed for the subscription object
           userId = await this.client.authStore.baseModel.id;
           deviceId = "";
           userAgent = navigator.userAgent;
@@ -352,10 +353,11 @@
                     applicationServerKey: pubKey
                   }).then(newSub => {
                     console.debug("Subscribed to notifications")
-                    // Send the subscription object to the database
-                    newSub.userId = userId;
-                    newSub.userAgent = userAgent;
-                    this.client.collection('subscriptions').create(newSub).catch((error) => {
+                    //deep copying sub object to add device related ids
+                    const currentSub = JSON.parse(JSON.stringify(newSub));
+                    // Add device details and Send the subscription object to the database
+                    const idSub = { ...currentSub, userId: userId, userAgent: userAgent };
+                    this.client.collection('subscriptions').create(idSub).catch((error) => {
                       if (error.status == '400') {
                         console.debug("Error subscibing to notifications");
                       }
@@ -365,6 +367,7 @@
               } else {
                 sub.unsubscribe().then(success => {
                   if (success) {
+                    //TODO: find out a way to delete subscription here
                     console.debug('Unsubscribed successfully');
                   } else {
                     console.error('Unsubscribe failed');

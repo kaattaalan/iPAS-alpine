@@ -34,12 +34,12 @@ cron.schedule(cronExpression, async () => {
         const data = await pb.collection('subscriptions').getList(1, 20, {
             filter: ''
         });
-        console.info(`Sending notifications to ${data.items.length} users`);
+        console.debug(`Sending notifications to ${data.items.length} users`);
         data.items.forEach(subscription => {
             webPush
-                .sendNotification(data.items[0], '{"title":"My Push","body":"my body"}', { TTL: '1000' })
+                .sendNotification(subscription, '{"title":"My Push","body":"my body"}', { TTL: '1000' })
                 .then(function () {
-                    console.log("Success");
+                    console.debug("Success");
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -54,5 +54,5 @@ cron.schedule(cronExpression, async () => {
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+    console.debug(`Server is listening on port ${port}`);
 });
