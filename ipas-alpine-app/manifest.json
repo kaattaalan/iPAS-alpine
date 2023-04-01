@@ -1,6 +1,6 @@
 {
-    "name": "DooDoo",
-    "short_name": "DooDoo",
+    "name": "To-Do",
+    "short_name": "To-Do",
     "icons": [
         {
             "src": "images/icons/android-launchericon-48-48.png",
@@ -31,5 +31,6 @@
     "start_url": "/",
     "display": "standalone",
     "background_color": "#222",
-    "theme_color": "#222"
+    "theme_color": "#222",
+    "scope": "/"
 }

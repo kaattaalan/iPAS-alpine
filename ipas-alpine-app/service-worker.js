@@ -1,5 +1,5 @@
 // Set the cache name and version
-const CACHE_NAME = 'ipas-cache-v2';
+const CACHE_NAME = 'ipas-cache-v3';
 
 // Set the list of URLs to cache
 const urlsToCache = [

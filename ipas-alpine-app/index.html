@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="DooDoo.it - Your Pocket Todo List">
+  <meta name="description" content="To-Do.it - Your Pocket Todo List">
 
-  <title>DooDoo - Pocket To-Do List</title>
+  <title>To-Do - Pocket To-Do List</title>
 
   <script src="js/pocketbase.umd.js"></script>
   <script src="js/install_pwa.js"></script>
@@ -22,7 +22,7 @@
     <nav>
       <ul>
         <li>
-          <h1 @click="selectedList = null" style="margin:0; text-align: center; cursor: pointer">DooDoo</h1>
+          <h1 @click="selectedList = null" style="margin:0; text-align: center; cursor: pointer">To-Do</h1>
         </li>
       </ul>
       <ul>
@@ -115,7 +115,7 @@
       </hr>
 
       <label for="newItem">Create New Item</label>
-      <input x-model="newItem" id="newItem" type="newItem" placeholder="What do you want to DooDoo?">
+      <input x-model="newItem" id="newItem" type="newItem" placeholder="What do you want to To-Do?">
       <button @click="createItem" class="contrast outline">Create</button>
 
       <hr style="margin: 1rem;">
@@ -329,12 +329,15 @@
           Notification.requestPermission().then(status => {
             this.permission = status;
             if (status === 'granted') {
-              console.log("Granted")
+              console.debug("Granted notification permissions")
               this.subscribe();
             }
           })
         },
         async subscribe() {
+          userId = await this.client.authStore.baseModel.id;
+          deviceId = "";
+          userAgent = navigator.userAgent;
           // Get the service worker registration
           navigator.serviceWorker.ready.then(reg => {
             // Get the push manager subscription
@@ -348,15 +351,21 @@
                     userVisibleOnly: true,
                     applicationServerKey: pubKey
                   }).then(newSub => {
-                    console.log("subscribed")
+                    console.debug("Subscribed to notifications")
                     // Send the subscription object to the database
-                    this.client.collection('subscriptions').create(newSub);
+                    newSub.userId = userId;
+                    newSub.userAgent = userAgent;
+                    this.client.collection('subscriptions').create(newSub).catch((error) => {
+                      if (error.status == '400') {
+                        console.debug("Error subscibing to notifications");
+                      }
+                    });
                   });
                 });
               } else {
                 sub.unsubscribe().then(success => {
                   if (success) {
-                    console.log('Unsubscribed successfully');
+                    console.debug('Unsubscribed successfully');
                   } else {
                     console.error('Unsubscribe failed');
                   }
