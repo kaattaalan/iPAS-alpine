@@ -29,6 +29,7 @@ document.addEventListener('alpine:init', () => {
 
         //days list
         userDay: {},
+        weekDayList: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
 
         // lists data
         lists: [],
@@ -130,17 +131,17 @@ document.addEventListener('alpine:init', () => {
                     await this.client.collection('user_days').create({
                         user: this.client.authStore.baseModel.id,
                         selected_days: {
-                            "Mon": false,
-                            "Tue": false,
-                            "Wed": false,
-                            "Thu": false,
-                            "Fri": false,
+                            1: false,
+                            2: false,
+                            3: false,
+                            4: false,
+                            5: false,
                         }
                     });
             }
         },
 
-        async toggleDays() {
+        async updateDays() {
             try {
                 await this.client.collection('user_days').update(this.userDay.id, this.userDay)
             } catch (err) {
@@ -148,6 +149,9 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        async getNextWeekday() { return (new Date().getDay() % 6) + 1; },
+
+        //PWA related methods
         async requestPermission() {
             Notification.requestPermission().then(status => {
                 this.permission = status;

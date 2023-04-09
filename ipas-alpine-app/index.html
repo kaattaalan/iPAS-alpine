@@ -43,9 +43,9 @@
         <form x-show="!showSignup">
           <h2>Login</h2>
           <label for="email">Email</label>
-          <input x-model="email" type="email" id="loginEmail" placeholder="Email address">
+          <input x-model="email" type="email" id="loginEmail" placeholder="Email address" autocomplete="on">
 
-          <label for="password">Password</label>
+          <label for=" password">Password</label>
           <input x-model="password" type="password" id="loginPassword" autocomplete="on">
 
           <button @click.prevent="login()" class="contrast outline">Login</button>
@@ -87,22 +87,27 @@
       <details>
         <summary role="button" class="secondary">Days</summary>
         <template x-for="(value, key) in userDay.selected_days" :key="key">
-          <div role="button" :class="{ outline: !value }" x-text="key"
-            x-on:click="userDay.selected_days[key] = !userDay.selected_days[key]; toggleDays(userDay)" href="#"></div>
+          <div role="button" :class="{ outline: !value }" x-text="weekDayList[key]"
+            x-on:click="userDay.selected_days[key] = !userDay.selected_days[key]; await updateDays(userDay)"
+            :style="{ display: 'inline-block', width: `${100/Object.keys(userDay.selected_days).length}%`,  'white-space': 'nowrap' , overflow: 'hidden', 'text-overflow': 'ellipsis' }"
+            href="#">
+          </div>
         </template>
       </details>
       <!-- Request Pass button -->
-      <div x-data="{modal_show : false}">
+      <div x-data="{modal_show : false, next_day : ''}">
         <footer dir="rtl">
-          <a role="button" class="contrast" @click="modal_show = true" href="#">Request Pass</a>
+          <a role="button" class="contrast" @click="next_day = weekDayList[await getNextWeekday()]; modal_show = true"
+            href="#">Request
+            Pass</a>
         </footer>
         <dialog :open="modal_show">
           <article>
             <p>
-              You are requesting pass for <strong x-text="modal_show"></strong>
+              You are requesting pass for <strong x-text="next_day"></strong>
             </p>
             <footer>
-              <a href="#cancel" role="button" class="secondary" @click="modal_show = false">Cancel</a>
+              <a href=" #cancel" role="button" class="secondary" @click="modal_show = false">Cancel</a>
               <a href="#confirm" role="button">Confirm</a>
             </footer>
           </article>
