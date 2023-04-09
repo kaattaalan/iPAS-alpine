@@ -27,6 +27,9 @@ document.addEventListener('alpine:init', () => {
         loginMessage: null,
         signupMessage: null,
 
+        //days list
+        userDay: {},
+
         // lists data
         lists: [],
         newListName: '',
@@ -51,40 +54,38 @@ document.addEventListener('alpine:init', () => {
                 });
 
                 return { url, options };
-            };
+            }
 
             // capture invalid token
             this.client.afterSend = function (response, data) {
                 if (response.status === 401) {
-                    this.showLogin = true
+                    this.showLogin = true;
                 }
-
-                return data
+                return data;
             }
 
             // if user is not logged in, show login / signup page
             if (!window.localStorage.getItem('pocketbase_auth')) {
-                this.showLogin = true
-                return
+                this.showLogin = true;
+                return;
             }
 
             // resume session
-            const auth = JSON.parse(window.localStorage.getItem('pocketbase_auth'))
-            this.client.authStore.save(auth.token, auth.model)
+            const auth = JSON.parse(window.localStorage.getItem('pocketbase_auth'));
+            this.client.authStore.save(auth.token, auth.model);
 
             // fetch todo lists
-            await this.getLists()
+            if (auth) {
+                await this.getDays();
+            }
 
-            // suscribe to live update events
-            this.subscribeToLists()
         },
 
         // login
         async login() {
             try {
                 const user = await this.client.collection('users').authWithPassword(this.email, this.password)
-                this.getLists()
-                this.subscribeToLists()
+                this.getDays()
                 this.showLogin = false
                 this.email = ''
                 this.password = ''
@@ -120,88 +121,28 @@ document.addEventListener('alpine:init', () => {
             this.showLogin = true
         },
 
-        // lists functions
-        async subscribeToLists() {
-            this.client.collection('list').subscribe('*', e => {
-                if (e.action === 'create') this.lists.push(e.record)
-                else if (e.action === 'delete') {
-                    this.lists = this.lists.filter(l => l.id !== e.record.id)
-                }
-            })
-        },
-
-        async getLists() {
-            this.client.collection('list').getList(1, 50).then((result) => {
-                const { items } = result;
-                this.lists = items;
-            }).catch((error) => {
-                console.log('Error:', error);
-            });
-        },
-
-        async createList() {
+        async getDays() {
             try {
-                const record = await this.client.collection('list').create({
-                    name: this.newListName,
-                    userID: this.client.authStore.baseModel.id
-                })
-                this.newListName = ''
+                this.userDay = await this.client.collection('user_days')
+                    .getFirstListItem(`user.id = '${this.client.authStore.baseModel.id}'`);
             } catch (err) {
-                console.log('ERR', err)
+                this.userDay =
+                    await this.client.collection('user_days').create({
+                        user: this.client.authStore.baseModel.id,
+                        selected_days: {
+                            "Mon": false,
+                            "Tue": false,
+                            "Wed": false,
+                            "Thu": false,
+                            "Fri": false,
+                        }
+                    });
             }
         },
 
-        async deleteList(list) {
+        async toggleDays() {
             try {
-                await this.client.collection('list').delete(list.id)
-            } catch (err) {
-                console.log('ERR', err)
-            }
-        },
-
-        async selectList(list) {
-            try {
-                this.client.collection('item').getList(null, null, { filter: `list.id = '${list.id}'` }).then((result) => {
-                    this.items = result.items;
-                    this.selectedList = list
-
-                });
-
-                // suscribe to live update events
-                this.client.collection('item').subscribe('*', e => {
-                    if (e.record.list !== list.id) return
-                    if (e.action === 'create') this.items.push(e.record)
-                    if (e.action === 'update')
-                        this.items = this.items.map(i => i.id === e.record.id ? e.record : i)
-                    else if (e.action === 'delete')
-                        this.items = this.items.filter(i => i.id !== e.record.id)
-                })
-            } catch (err) {
-                console.log('ERR', err)
-            }
-        },
-
-        // items functions
-        async createItem() {
-            try {
-                await this.client.collection('item').create({ text: this.newItem, list: this.selectedList.id })
-                this.newItem = ''
-            } catch (err) {
-                console.log('ERR', err)
-            }
-        },
-
-        async deleteItem(item) {
-            try {
-                await this.client.collection('item').delete(item.id)
-            } catch (err) {
-                console.log('ERR', err)
-            }
-        },
-
-        async toggleDone(item, toggle) {
-            try {
-                await this.client.collection('item').update(item.id, { done: toggle })
+                await this.client.collection('user_days').update(this.userDay.id, this.userDay)
             } catch (err) {
                 console.log('ERR', err)
             }

@@ -40,14 +40,13 @@
     <!-- login / signup -->
     <article x-show="showLogin" x-transition>
       <div x-data="{ showSignup: false }">
-
         <form x-show="!showSignup">
           <h2>Login</h2>
           <label for="email">Email</label>
           <input x-model="email" type="email" id="loginEmail" placeholder="Email address">
 
           <label for="password">Password</label>
-          <input x-model="password" type="password" id="loginPassword">
+          <input x-model="password" type="password" id="loginPassword" autocomplete="on">
 
           <button @click.prevent="login()" class="contrast outline">Login</button>
           <mark x-show="loginMessage" class="small" x-text="loginMessage"></mark>
@@ -78,57 +77,39 @@
           </div>
         </template>
       </div>
-
-
     </article>
 
-    <!-- show lists -->
-    <article x-show="!showLogin && !selectedList" x-transition style="margin-top: 10%;">
-      <h2>Your Lists</h2>
-
-      <template x-for="list in lists">
-        <div style="display:flex; justify-content: space-between; margin-top: 1rem">
-          <u><strong x-text="list.name" @click="selectList(list)" style="cursor: pointer;"></strong></u>
-          <i @click="deleteList(list)" class="bx bx-trash bx-sm" style="text-align: end; cursor: pointer"></i>
-        </div>
-      </template>
-
-      <hr style="margin: 2rem">
-      </hr>
-
-      <label for="newList">Create New List</label>
-      <input x-model="newListName" id="newList" type="newList" placeholder="List Name">
-      <button @click="createList" class="contrast outline">Create</button>
-
+    <!-- show user page -->
+    <article x-show="!showLogin && userDay" x-data="userDay" x-transition>
+      <header x-text="client.authStore.baseModel?client.authStore.baseModel.email:''"></header>
+      <article aria-busy="true">Waiting for allocation.</article>
+      <!-- toggle days -->
+      <details>
+        <summary role="button" class="secondary">Days</summary>
+        <template x-for="(value, key) in userDay.selected_days" :key="key">
+          <div role="button" :class="{ outline: !value }" x-text="key"
+            x-on:click="userDay.selected_days[key] = !userDay.selected_days[key]; toggleDays(userDay)" href="#"></div>
+        </template>
+      </details>
+      <!-- Request Pass button -->
+      <div x-data="{modal_show : false}">
+        <footer dir="rtl">
+          <a role="button" class="contrast" @click="modal_show = true" href="#">Request Pass</a>
+        </footer>
+        <dialog :open="modal_show">
+          <article>
+            <p>
+              You are requesting pass for <strong x-text="modal_show"></strong>
+            </p>
+            <footer>
+              <a href="#cancel" role="button" class="secondary" @click="modal_show = false">Cancel</a>
+              <a href="#confirm" role="button">Confirm</a>
+            </footer>
+          </article>
+        </dialog>
+      </div>
     </article>
 
-    <!-- show selectedList items -->
-    <article x-show="!showLogin && selectedList" x-transition style="margin-top: 10%;">
-      <h2>Test</h2>
-
-      <template x-for="item in items">
-        <div style="display:flex; justify-content: space-between; margin-top: 1rem">
-          <label for="check">
-            <input x-model="item.done" @change="e => toggleDone(item, e.target.checked)" type="checkbox" id="check">
-            <strong x-text="item.text"></strong>
-          </label>
-          <i @click="deleteItem(item)" class="bx bx-trash bx-sm" style="text-align: end; cursor: pointer"></i>
-        </div>
-      </template>
-
-      <hr style="margin: 2rem">
-      </hr>
-
-      <label for="newItem">Create New Item</label>
-      <input x-model="newItem" id="newItem" type="newItem" placeholder="What do you want to iPAS?">
-      <button @click="createItem" class="contrast outline">Create</button>
-
-      <hr style="margin: 1rem;">
-      </hr>
-
-      <button @click="selectedList = null" class="primary outline">Back</button>
-
-    </article>
   </div>
 
 </body>
